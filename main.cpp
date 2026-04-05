@@ -1,5 +1,7 @@
 #include <M5CoreS3.h>
 #include <Wiegand.h>
+#include <WiFi.h>
+#include "wifi_config.h"
 
 #define D0_PIN 8
 #define D1_PIN 9
@@ -12,6 +14,33 @@ int doorState = 0;
 
 bool ouvertureActive = false;
 unsigned long ouvertureStart = 0;
+
+bool setWifi() {
+  WiFi.mode(WIFI_STA);
+  WiFi.setSleep(false);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+
+  Serial.print("Connexion WiFi");
+
+  uint32_t start = millis();
+
+  while (WiFi.status() != WL_CONNECTED && millis() - start < 20000) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println();
+
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println("WiFi CONNECTE");
+    Serial.print("IP : ");
+    Serial.println(WiFi.localIP());
+    return true;
+  }
+
+  Serial.println("WiFi ECHEC");
+  return false;
+}
 
 void ecranPrincipal() {
   CoreS3.Display.clear(BLACK);
@@ -44,6 +73,19 @@ void setup() {
   wg.begin(D0_PIN, D1_PIN);
 
   ecranPrincipal();
+
+  CoreS3.Display.setCursor(0, 160);
+  CoreS3.Display.println("WiFi...");
+
+  if (setWifi()) {
+    CoreS3.Display.fillRect(0, 160, 320, 25, BLACK);
+    CoreS3.Display.setCursor(0, 160);
+    CoreS3.Display.println("WiFi OK");
+  } else {
+    CoreS3.Display.fillRect(0, 160, 320, 25, BLACK);
+    CoreS3.Display.setCursor(0, 160);
+    CoreS3.Display.println("WiFi ECHEC");
+  }
 
   Serial.println("SYSTEM READY");
 }
