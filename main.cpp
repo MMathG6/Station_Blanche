@@ -1,6 +1,11 @@
 #include <M5CoreS3.h>
+#include <Wiegand.h>
 
+#define D0_PIN 8
+#define D1_PIN 9
 #define DOOR_PIN 18
+
+WIEGAND wg;
 
 int doorState = 0;
 
@@ -24,6 +29,8 @@ void setup() {
 
   pinMode(DOOR_PIN, INPUT_PULLUP);
 
+  wg.begin(D0_PIN, D1_PIN);
+
   ecranPrincipal();
 
   Serial.println("SYSTEM READY");
@@ -31,6 +38,18 @@ void setup() {
 
 void loop() {
   doorState = digitalRead(DOOR_PIN);
+
+  if (wg.available()) {
+    uint32_t code = wg.getCode();
+
+    char uidBuffer[9];
+    sprintf(uidBuffer, "%08X", code);
+
+    String uidBadge = String(uidBuffer);
+
+    Serial.print("Badge : ");
+    Serial.println(uidBadge);
+  }
 
   String etatPorte = "";
 
