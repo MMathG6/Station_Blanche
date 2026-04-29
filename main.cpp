@@ -4,10 +4,14 @@
 #define D0_PIN 8
 #define D1_PIN 9
 #define DOOR_PIN 18
+#define PUSH_PIN 17
 
 WIEGAND wg;
 
 int doorState = 0;
+
+bool ouvertureActive = false;
+unsigned long ouvertureStart = 0;
 
 void ecranPrincipal() {
   CoreS3.Display.clear(BLACK);
@@ -21,6 +25,12 @@ void ecranPrincipal() {
   CoreS3.Display.println("PORTE:");
 }
 
+void ouvrirPorte() {
+  digitalWrite(PUSH_PIN, LOW);
+  ouvertureActive = true;
+  ouvertureStart = millis();
+}
+
 void setup() {
   Serial.begin(115200);
   delay(500);
@@ -28,6 +38,8 @@ void setup() {
   CoreS3.begin();
 
   pinMode(DOOR_PIN, INPUT_PULLUP);
+  pinMode(PUSH_PIN, OUTPUT);
+  digitalWrite(PUSH_PIN, HIGH);
 
   wg.begin(D0_PIN, D1_PIN);
 
@@ -39,6 +51,11 @@ void setup() {
 void loop() {
   doorState = digitalRead(DOOR_PIN);
 
+  if (ouvertureActive && millis() - ouvertureStart >= 3000) {
+    digitalWrite(PUSH_PIN, HIGH);
+    ouvertureActive = false;
+  }
+
   if (wg.available()) {
     uint32_t code = wg.getCode();
 
@@ -49,6 +66,8 @@ void loop() {
 
     Serial.print("Badge : ");
     Serial.println(uidBadge);
+
+    ouvrirPorte();
   }
 
   String etatPorte = "";
