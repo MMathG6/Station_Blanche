@@ -102,7 +102,7 @@ station-blanche/
 ├── README.md
 ├── main.cpp
 │
-├── API/
+├── API_BADGES/
 │   ├── api_badge.py
 │   └── requirements.txt
 ```
@@ -127,11 +127,7 @@ python3 api_badge.py
 
 ## Base de données MariaDB
 
-Importer le fichier :
-
-```sql
-station_blanche.sql
-```
+La structure de la base de données est décrite dans la documentation technique du projet.
 
 ## M5Stack CoreS3
 
